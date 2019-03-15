@@ -1,8 +1,7 @@
 import java.net.*;
 import java.io.*; 
 
-import request.Request;
-import request.RequestThread;
+import request.*;
 
 final class MainServer {
 

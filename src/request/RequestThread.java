@@ -17,30 +17,35 @@ public final class RequestThread implements Runnable {
 	public void run() {
 
 		if(request.isValid) {
-
-			try {
-				final HttpURLConnection connection = (HttpURLConnection) request.url.openConnection();
-
-				connection.setRequestMethod("GET");
+			if (WebCache.shared.isCached(request.url)) {
+				outToClient.writeBytes(WebCache.shared.retrieveWebPageFor(request.url));
+			} else {
+				try {
+					final HttpURLConnection connection = (HttpURLConnection) request.url.openConnection();
+	
+					connection.setRequestMethod("GET");
+						
+					final BufferedReader requestResponseBuffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	
+					final StringBuffer content = new StringBuffer();
+					String inputLine;
+					while((inputLine = requestResponseBuffer.readLine()) != null) {
+						content.append(inputLine);
+					}
+	
+					requestResponseBuffer.close();
+					connection.disconnect();
+	
+					final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
 					
-				final BufferedReader requestResponseBuffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-				final StringBuffer content = new StringBuffer();
-				String inputLine;
-				while((inputLine = requestResponseBuffer.readLine()) != null) {
-					content.append(inputLine);
+					String page = content.toString();
+					WebCache.shared.saveWebPageFor(request.url, page);
+					outToClient.writeBytes(page);
+	
+				} catch(IOException exception) {
+					System.out.println("IOException!!!");
+					System.out.println(exception.toString());
 				}
-
-				requestResponseBuffer.close();
-				connection.disconnect();
-
-				final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
-
-				outToClient.writeBytes(content.toString());
-
-			} catch(IOException exception) {
-				System.out.println("IOException!!!");
-				System.out.println(exception.toString());
 			}
 		} else {
 			System.out.println("Request is invalid");
