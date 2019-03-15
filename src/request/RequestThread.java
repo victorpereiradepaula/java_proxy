@@ -38,7 +38,7 @@ public final class RequestThread implements Runnable {
 				final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
 				
 				String page = content.toString();
-				WebCache.shared.saveWebPageFor(request.url.toString(), page);
+				WebCache.shared.saveWebPageFor(request.urlString, page);
 				outToClient.writeBytes(page);
 
 			} catch(IOException exception) {
