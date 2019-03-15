@@ -1,4 +1,7 @@
 import java.net.*;
+
+import cache.WebCache;
+
 import java.io.*; 
 
 import request.*;
@@ -33,13 +36,20 @@ final class MainServer {
 
 			System.out.println("Client requested: " + clientText);
 
-			Request request = new Request(clientText);
+			if (WebCache.shared.isCached(clientText)) {
+				final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+				
+				outToClient.writeBytes(WebCache.shared.retrieveWebPageFor(clientText));
+				
+			} else {
+				Request request = new Request(clientText);
 
-			Thread requestThread = new Thread(new RequestThread(request, socket));
+				Thread requestThread = new Thread(new RequestThread(request, socket));
 
-			System.out.println("Making request...");
+				System.out.println("Making request...");
 
-			requestThread.start();
+				requestThread.start();
+			}
 		}
 	}
 }
