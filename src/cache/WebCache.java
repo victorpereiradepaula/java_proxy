@@ -1,10 +1,18 @@
 package cache;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public final class WebCache implements WebCacheInterface {
 
-	private HashMap<String, String> cache = new HashMap<String, String>();
+	private HashMap<String, CachedItem> cache = new HashMap<String, CachedItem>();
+	private LinkedList<String> cachePerDate = new LinkedList<String>();
+	private int cacheSizeInBytes = 100000000;
+	private int freeSpace = 100;
+
+	public final synchronized void setCacheSizeInMB(int valueInMB) {
+		this.cacheSizeInBytes = valueInMB * 1000000;
+	}
 
 	public final synchronized Boolean isCached(String url) {
 		return cache.containsKey(url);
@@ -12,13 +20,35 @@ public final class WebCache implements WebCacheInterface {
 
 	public final synchronized String retrieveWebPageFor(String url) {
 		if (this.isCached(url)) {
-			return cache.get(url);
+			return cache.get(url).getItem();
 		} else {
 			return "";
 		}
 	}
 
 	public final synchronized void saveWebPageFor(String url, String webPage) {
-		cache.put(url, webPage);
+		int pageSize = webPage.getBytes().length;
+		if (pageSize <= this.cacheSize) {
+			addOnCache(url, webPage, pageSize);
+		} else {
+			System.out.println("Não foi possível adicionar página à cache.");
+		}
+	}
+
+	private final synchronized void addOnCache(String url, String webPage, int pageSize) {
+		if (pageSize >= this.freeSpace) {
+			removeCachedItemUntil(pageSize);
+		}
+		cachePerDate.addFirst(url);
+		cache.put(url, new cache.CachedItem(webPage));
+		this.freeSpace -= pageSize;
+		System.out.println("Página adicionada à cache com sucesso.");
+	}
+
+	private final synchronized void removeCachedItemUntil(int pageSize) {
+		while (this.cacheSize >= pageSize && this.freeSpace >= pageSize) {
+			CachedItem removedItem = cache.remove(cachePerDate.removeLast());
+			this.freeSpace += removedItem.getSize();
+		}
 	}
 }
