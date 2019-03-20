@@ -7,8 +7,8 @@ public final class WebCache implements WebCacheInterface {
 
 	private HashMap<String, CachedItem> cache = new HashMap<String, CachedItem>();
 	private LinkedList<String> cachePerDate = new LinkedList<String>();
-	private int cacheSizeInBytes = 100000000;
-	private int freeSpace = 100;
+	private int cacheSizeInBytes = 50000000;
+	private int freeSpace = 50000000;
 
 	public final synchronized void setCacheSizeInMB(int valueInMB) {
 		this.cacheSizeInBytes = valueInMB * 1000000;
@@ -45,6 +45,7 @@ public final class WebCache implements WebCacheInterface {
 		cache.put(url, new cache.CachedItem(webPage));
 		this.freeSpace -= pageSize;
 		System.out.println("Página adicionada à cache com sucesso.");
+		System.out.printf("Espaço livre na cache: %d\n", this.freeSpace);
 	}
 
 	private final synchronized void removeCachedItemUntil(int pageSize) {
