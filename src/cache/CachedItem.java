@@ -18,6 +18,7 @@ public final class CachedItem {
 
   public void updateLastAccessDate() {
     this.lastAccessDate = new Date();
+    System.out.println("Access date updated.");
   }
 
   /**

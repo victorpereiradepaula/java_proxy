@@ -37,7 +37,7 @@ final class MainServer {
 			System.out.println("Client requested: " + clientText);
 
 			if (WebCache.shared.isCached(clientText)) {
-				System.out.println("Get cached...");
+				System.out.println("Geting cached item...");
 				final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
 				
 				outToClient.writeBytes(WebCache.shared.retrieveWebPageFor(clientText));

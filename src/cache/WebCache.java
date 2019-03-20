@@ -20,7 +20,9 @@ public final class WebCache implements WebCacheInterface {
 
 	public final synchronized String retrieveWebPageFor(String url) {
 		if (this.isCached(url)) {
-			return cache.get(url).getItem();
+			CachedItem cachedItem = cache.get(url);
+			cachedItem.updateLastAccessDate();
+			return cachedItem.getItem();
 		} else {
 			return "";
 		}
