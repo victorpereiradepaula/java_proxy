@@ -21,7 +21,7 @@ public final class WebCache implements WebCacheInterface {
 	public final synchronized String retrieveWebPageFor(String url) {
 		if (this.isCached(url)) {
 			CachedItem cachedItem = cache.get(url);
-			cachedItem.updateLastAccessDate();
+			this.updateLastAccessDate(url, cachedItem);
 			return cachedItem.getItem();
 		} else {
 			return "";
@@ -52,5 +52,11 @@ public final class WebCache implements WebCacheInterface {
 			CachedItem removedItem = cache.remove(cachePerDate.removeLast());
 			this.freeSpace += removedItem.getSize();
 		}
+	}
+
+	private final synchronized void updateLastAccessDate(String url, CachedItem cachedItem) {
+		cachePerDate.remove(url);
+		cachePerDate.addFirst(url);
+		cachedItem.updateLastAccessDate();
 	}
 }
