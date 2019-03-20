@@ -28,7 +28,7 @@ public final class WebCache implements WebCacheInterface {
 
 	public final synchronized void saveWebPageFor(String url, String webPage) {
 		int pageSize = webPage.getBytes().length;
-		if (pageSize <= this.cacheSize) {
+		if (pageSize <= this.cacheSizeInBytes) {
 			addOnCache(url, webPage, pageSize);
 		} else {
 			System.out.println("Não foi possível adicionar página à cache.");
@@ -46,7 +46,7 @@ public final class WebCache implements WebCacheInterface {
 	}
 
 	private final synchronized void removeCachedItemUntil(int pageSize) {
-		while (this.cacheSize >= pageSize && this.freeSpace >= pageSize) {
+		while (this.cacheSizeInBytes >= pageSize && this.freeSpace >= pageSize) {
 			CachedItem removedItem = cache.remove(cachePerDate.removeLast());
 			this.freeSpace += removedItem.getSize();
 		}

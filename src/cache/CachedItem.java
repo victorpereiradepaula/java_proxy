@@ -16,7 +16,7 @@ public final class CachedItem {
     this.lastAccessDate = new Date();
   }
 
-  public updateLastAccessDate() {
+  public void updateLastAccessDate() {
     this.lastAccessDate = new Date();
   }
 
