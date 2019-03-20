@@ -1,11 +1,12 @@
 package request;
 
 import java.net.*;
-import java.io.*; 
+import java.io.*;
+
 import response.ResponseInterface;
 import response.Response;
-// import response.Response404;
-// import response.Response200;
+
+import cache.*;
 
 public final class RequestThread implements Runnable {
 
@@ -22,36 +23,61 @@ public final class RequestThread implements Runnable {
 
 		if(request.isValid) {
 
-			try {
-				final HttpURLConnection connection = (HttpURLConnection) request.url.openConnection();
+			String cachedHTML = WebCache.shared.retrieveWebPageFor(request.urlString);
+			if(cachedHTML == null) {
 
-				connection.setRequestMethod("GET");
-				connection.connect();
-				final int responseCode = connection.getResponseCode();
+				try {
+					final HttpURLConnection connection = (HttpURLConnection) request.url.openConnection();
 
-				System.out.println("Response code: " + responseCode);
-					
-				final BufferedReader requestResponseBuffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+					connection.setRequestMethod("GET");
+					connection.connect();
+					final int responseCode = connection.getResponseCode();
 
-				final StringBuffer content = new StringBuffer();
-				String inputLine;
-				while((inputLine = requestResponseBuffer.readLine()) != null) {
-					content.append(inputLine);
+					System.out.println("Response code: " + responseCode);
+						
+					final BufferedReader requestResponseBuffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+					final StringBuffer content = new StringBuffer();
+					String inputLine;
+					while((inputLine = requestResponseBuffer.readLine()) != null) {
+						content.append(inputLine);
+					}
+
+					requestResponseBuffer.close();
+					connection.disconnect();
+
+					final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+
+					final ResponseInterface response = new Response(responseCode, content.toString());
+
+					if(responseCode == 200) {
+						WebCache.shared.saveWebPageFor(request.urlString, content.toString());
+					}
+
+					System.out.println(response.buildResponse());
+					outToClient.writeBytes(response.buildResponse());
+
+				} catch(IOException exception) {
+					System.out.println("IOException!!!");
+					exception.printStackTrace();
 				}
 
-				requestResponseBuffer.close();
-				connection.disconnect();
+			} else {
 
-				final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+				try {
 
-				final ResponseInterface response = new Response(responseCode, content.toString());
-				System.out.println(response.buildResponse());
-				outToClient.writeBytes(response.buildResponse());
+					System.out.println("IS CACHED");
 
-			} catch(IOException exception) {
-				System.out.println("IOException!!!");
-				exception.printStackTrace();
+					final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+					final ResponseInterface response = new Response(200, cachedHTML);
+					System.out.println(response.buildResponse());
+					outToClient.writeBytes(response.buildResponse());
+				} catch(IOException exception) {
+					System.out.println("IOException!!!");
+					exception.printStackTrace();
+				}
 			}
+
 		} else {
 			System.out.println("Request is invalid");
 			System.out.println("Error: " + request.error);
