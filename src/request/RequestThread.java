@@ -2,6 +2,10 @@ package request;
 
 import java.net.*;
 import java.io.*; 
+import response.ResponseInterface;
+import response.Response;
+// import response.Response404;
+// import response.Response200;
 
 public final class RequestThread implements Runnable {
 
@@ -22,6 +26,10 @@ public final class RequestThread implements Runnable {
 				final HttpURLConnection connection = (HttpURLConnection) request.url.openConnection();
 
 				connection.setRequestMethod("GET");
+				connection.connect();
+				final int responseCode = connection.getResponseCode();
+
+				System.out.println("Response code: " + responseCode);
 					
 				final BufferedReader requestResponseBuffer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
@@ -36,11 +44,13 @@ public final class RequestThread implements Runnable {
 
 				final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
 
-				outToClient.writeBytes(content.toString());
+				final ResponseInterface response = new Response(responseCode, content.toString());
+				System.out.println(response.buildResponse());
+				outToClient.writeBytes(response.buildResponse());
 
 			} catch(IOException exception) {
 				System.out.println("IOException!!!");
-				System.out.println(exception.toString());
+				exception.printStackTrace();
 			}
 		} else {
 			System.out.println("Request is invalid");
@@ -49,6 +59,8 @@ public final class RequestThread implements Runnable {
 
 		try {
 			socket.close();
-		} catch(IOException exception) { }
+		} catch(IOException exception) { 
+			exception.printStackTrace();
+		}
 	}
 }

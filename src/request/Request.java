@@ -16,26 +16,26 @@ public final class Request {
 	public final Boolean isValid;
 	
 	public Request(String urlString) {
-		final Pattern urlPattern = Pattern.compile("(http:\\/\\/|https:\\/\\/)?[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?");
-		final Matcher matcher = urlPattern.matcher(urlString);
+		final Pattern urlPattern = Pattern.compile("(http:\\/\\/|https:\\/\\/)[a-z0-9]+([.]{1}[a-z0-9]+)*([.]{1}[a-z0-9]+)*([/a-z0-9]+)?");
 		
-		this.urlString = urlString;
+		final Matcher matcher = urlPattern.matcher(urlString);
 
-		if(matcher.matches()) {
+		if(matcher.find()) {
 
-			if(!urlString.contains("http://") || !urlString.contains("https://")) {
-				urlString = "https://" + urlString;
-			}
+			String urlMatch = matcher.group(0);
+
+			this.urlString = urlMatch;
 
 			URL userURL = null;
 			String error = null;
 			boolean isValid = false;
 
 			try {
-				userURL = new URL(urlString);
+				userURL = new URL(this.urlString);
 				isValid = true;
 			} catch(MalformedURLException exception) {
-				error = "MalformedURLException for " + urlString;
+				exception.printStackTrace();
+				error = "MalformedURLException for " + this.urlString;
 				isValid = false;
 			}
 
@@ -47,6 +47,7 @@ public final class Request {
 			this.error = "User url does not follow url pattern (www.somewebsite.com) for: " + urlString;
 			this.url = null;
 			this.isValid = false;
+			this.urlString = null;
 		}
 	}
 }

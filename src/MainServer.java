@@ -6,15 +6,26 @@ import request.RequestThread;
 
 final class MainServer {
 
-	// Check for a better REGEX later??
-	static final String urlPattern = "(http:\\/\\/|https:\\/\\/)?[a-z0-9]+([-.]{1}[a-z0-9]+)*.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?";
-
 	public static void main(String args[]) throws Exception {
 
-		System.out.println("Starting proxy server at: 8081");
+		if(args.length > 0) {
+			String command = args[0];
+			if(command.equals("--help")) {
+				System.out.println("run 'Java MainServer <port-number>'' to use a custom port");
+				System.out.println("If no port is specified then the server will run on 8080");
+				System.exit(0);
+			}
+		}
+
+		int portNumber = 8080;
+		if(args.length > 0) {
+			portNumber = Integer.parseInt(args[0]);
+		}
+
+		System.out.println("Starting proxy server at: " + portNumber);
 
 		// Might throw exception
-		ServerSocket welcomeSocket = new ServerSocket(8081);
+		ServerSocket welcomeSocket = new ServerSocket(portNumber);
 		InetAddress address = welcomeSocket.getInetAddress();
 
 		System.out.println("Address:" + address.getHostAddress());
