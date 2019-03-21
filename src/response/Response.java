@@ -15,6 +15,12 @@ public final class Response implements ResponseInterface {
 	public String buildResponse() {
 		String response = "";
 
+		System.out.println("\n\n\nV\n\n\n");
+		System.out.println("\n\n\nV\n\n\n");
+		System.out.println(html);
+		System.out.println("\n\n\nV\n\n\n");
+		System.out.println("\n\n\nV\n\n\n");
+
 		switch(statusCode) {
 			case 200:
 				response += "HTTP/1.1 200 OK\r\n";
@@ -25,6 +31,7 @@ public final class Response implements ResponseInterface {
 			break;				
 
 			default:
+				response += String.format("HTTP/1.1 %d Error\r\n", statusCode);
 				break;
 		}
 

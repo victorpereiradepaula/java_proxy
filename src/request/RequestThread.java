@@ -48,13 +48,17 @@ public final class RequestThread implements Runnable {
 
 					final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
 
-					final ResponseInterface response = new Response(responseCode, content.toString());
+					final ResponseInterface response;
 
 					if(responseCode == 200) {
+						response = new Response(responseCode, content.toString());
 						WebCache.shared.saveWebPageFor(request.urlString, content.toString());
+					} else {
+						response = new Response(200, ErrorPageBuilder.shared.getErrorPage(responseCode, ""));
 					}
-
+					System.out.println("\n\nV\n\n");
 					System.out.println(response.buildResponse());
+					System.out.println("\n\nV\n\n");
 					outToClient.writeBytes(response.buildResponse());
 
 				} catch(IOException exception) {

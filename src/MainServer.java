@@ -10,21 +10,19 @@ final class MainServer {
 
 	public static void main(String args[]) throws Exception {
 
-		if(args.length > 0) {
-			String command = args[0];
-			if(command.equals("--help")) {
-				System.out.println("run 'Java MainServer <port-number>'' to use a custom port");
-				System.out.println("If no port is specified then the server will run on 8080");
-				System.exit(0);
-			}
-		}
-
 		int portNumber = 8080;
-		if(args.length > 0) {
+		int cacheSize = 50;
+
+		if(args.length == 2) {
 			portNumber = Integer.parseInt(args[0]);
+			cacheSize = Integer.parseInt(args[1]);
+			WebCache.shared.setCacheSizeInMB(cacheSize);
+		} else {
+			System.out.println("Please, run 'Java MainServer <port-number> <cache-size-MB>'");
+			System.exit(0);
 		}
 
-		System.out.println("Starting proxy server at: " + portNumber);
+		System.out.println("Starting proxy server at: " + portNumber + " with cache size: " + cacheSize + "MB");
 
 		// Might throw exception
 		ServerSocket welcomeSocket = new ServerSocket(portNumber);
