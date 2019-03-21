@@ -14,8 +14,16 @@ final class MainServer {
 		int cacheSize = 50;
 
 		if(args.length == 2) {
-			portNumber = Integer.parseInt(args[0]);
-			cacheSize = Integer.parseInt(args[1]);
+			try {
+				portNumber = Integer.parseInt(args[0]);
+				cacheSize = Integer.parseInt(args[1]);
+			} catch (ArrayIndexOutOfBoundsException e) {
+					System.out.println("Need port number and cache size as arguments");
+					System.exit(-1);
+			} catch (NumberFormatException e) {
+					System.out.println("Please give port number and cache size as integers");
+					System.exit(-1);
+			}
 			WebCache.shared.setCacheSizeInMB(cacheSize);
 		} else {
 			System.out.println("Please, run 'Java MainServer <port-number> <cache-size-MB>'");
@@ -28,10 +36,10 @@ final class MainServer {
 		ServerSocket welcomeSocket = new ServerSocket(portNumber);
 		InetAddress address = welcomeSocket.getInetAddress();
 
-		System.out.println("Address:" + address.getHostAddress());
+		System.out.println("Address: " + address.getHostAddress());
 
 		while(true) {
-			System.out.println("Waiting for client connection");
+			System.out.println("Waiting for client connection...");
 			// Might throw exception
 			Socket socket = welcomeSocket.accept();
 
