@@ -27,7 +27,7 @@ public final class Response implements ResponseInterface {
 
 			default:
 				response += String.format("HTTP/1.1 200 OK\r\n");
-				responseHtml = getErrorPage(statusCode, "Error");
+				responseHtml = getErrorPage(statusCode, "");
 				break;
 		}
 
