@@ -19,10 +19,13 @@ Ensinaremos de forma breve a configuração do Firefox para utilizar o proxy:
 1. Após compilado, para utilizar execute o seguinte comanando no terminal ```Java MainServer <número_da_porta> <tamanho_da_cache_em_MB>```
 1. Volte ao navegador e navegue
 
-## Problemas e soluções
-1. Cabeçlhos HTTP:
+## Implementação
+### Problemas e soluções
+1. Cabeçlhos HTTP: Nas primeiras fases da implementação não havíamos implementado a adição de cabeçalhos às respostas, o que acarretava a não renderização das páginas que testávamos, mesmo quando recebiamos conteúdo nas respostas.
 
-1. LRU (Least Recently Used):
+1. Cache e LRU (Least Recently Used): Como temos uma limitação do tamanho da cache, temos a necessidade de remover itens conforme há demanda por espaço. A solução encontrada para implementação de forma mais fácil, foi criar uma **LinkedList** para armazenar os *URLs* das páginas acessadas, desta forma as páginas mais antigas sempre estarão no fim da lista. Também criamos um **HashMap** para salvar os elementos cacheados, com a *URL* como chave, desta forma quando precisamos remover itens, removemos a partir da última posição da **LinkedList**. O uso do **HashMap** além da **LinkedList** foi para facilitar a optenção dos dados da cache, por meio do *URL* (chave).
 
 1. Requisição de imagens:
+
+1. HTTPS:
 
