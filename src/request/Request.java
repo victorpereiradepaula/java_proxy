@@ -7,47 +7,53 @@ import java.net.MalformedURLException;
 
 public final class Request {
 
-	public final String urlString;
+    public final String urlString;
 
-	public final URL url;
+    public final URL url;
 
-	public final String error;
+    public final String error;
 
-	public final Boolean isValid;
-	
-	public Request(String urlString) {
-		final Pattern urlPattern = Pattern.compile("(http:\\/\\/|https:\\/\\/)[a-z0-9]+([.]{1}[a-z0-9]+)*([.]{1}[a-z0-9]+)*([/a-z0-9]+)?");
-		
-		final Matcher matcher = urlPattern.matcher(urlString);
+    public final Boolean isValid;
 
-		if(matcher.find()) {
+    public final Boolean isImage;
 
-			String urlMatch = matcher.group(0);
+    public Request(String urlString) {
+        final Pattern urlPattern = Pattern.compile("(http:\\/\\/|https:\\/\\/)?[a-z0-9]+([.]{1}[a-z0-9]+)*([.]{1}[a-z0-9]+)*([/a-z0-9_.-]+)?");
+        final Pattern imagePattern = Pattern.compile("(.png|.jpg)");
 
-			this.urlString = urlMatch;
+        final Matcher matcher = urlPattern.matcher(urlString);
+        final Matcher imageMatcher = imagePattern.matcher(urlString);
 
-			URL userURL = null;
-			String error = null;
-			boolean isValid = false;
+        if(matcher.find()) {
 
-			try {
-				userURL = new URL(this.urlString);
-				isValid = true;
-			} catch(MalformedURLException exception) {
-				exception.printStackTrace();
-				error = "MalformedURLException for " + this.urlString;
-				isValid = false;
-			}
+            String urlMatch = matcher.group(0);
 
-			this.error = error;
-			this.url = userURL;
-			this.isValid = isValid;
+            this.urlString = urlMatch;
 
-		} else {
-			this.error = "User url does not follow url pattern (www.somewebsite.com) for: " + urlString;
-			this.url = null;
-			this.isValid = false;
-			this.urlString = null;
-		}
-	}
+            URL userURL = null;
+            String error = null;
+            boolean isValid = false;
+
+            try {
+                userURL = new URL(this.urlString);
+                isValid = true;
+            } catch(MalformedURLException exception) {
+                exception.printStackTrace();
+                error = "MalformedURLException for " + this.urlString;
+                isValid = false;
+            }
+
+            this.error = error;
+            this.url = userURL;
+            this.isValid = isValid;
+
+        } else {
+            this.error = "User url does not follow url pattern (www.somewebsite.com) for: " + urlString;
+            this.url = null;
+            this.isValid = false;
+            this.urlString = null;
+        }
+
+        this.isImage = imageMatcher.find();
+    }
 }
