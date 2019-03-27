@@ -10,12 +10,13 @@ public class WebCache implements WebCacheInterface {
     private HashMap<String, CachedItem> cache = new HashMap<>();
     private LinkedList<String> cachePerDate = new LinkedList<>();
     private int cacheSizeInBytes = 50000000;
-    private int freeSpace = 50000000;
+    private int freeSpace = cacheSizeInBytes;
 
     private WebCache() {}
 
     public final synchronized void setCacheSizeInMB(int valueInMB) {
         this.cacheSizeInBytes = valueInMB * 1000000;
+        this.freeSpace = cacheSizeInBytes;
     }
 
     public final synchronized Boolean isCached(String key) {

@@ -8,13 +8,9 @@ import java.net.MalformedURLException;
 public final class Request {
 
     public final String urlString;
-
     public final URL url;
-
     public final String error;
-
     public final Boolean isValid;
-
     public final Boolean isImage;
 
     public Request(String urlString) {

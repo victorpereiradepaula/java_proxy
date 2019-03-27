@@ -20,6 +20,8 @@ Ensinaremos de forma breve a configuração do Firefox para utilizar o proxy:
 1. Volte ao navegador e navegue
 
 ## Implementação
+### Classes
+
 ### Problemas e soluções
 1. Cabeçlhos HTTP: Nas primeiras fases da implementação não havíamos implementado a adição de cabeçalhos às respostas, o que acarretava a não renderização das páginas que testávamos, mesmo quando recebiamos conteúdo nas respostas.
 
@@ -29,3 +31,6 @@ Ensinaremos de forma breve a configuração do Firefox para utilizar o proxy:
 
 1. HTTPS:
 
+1. Requisição de vídeos: Não foram realizados os tratamentos necessários para requisições de vídeos, nem o armazenamento destes na cache.
+
+## Conclusão
