@@ -14,6 +14,10 @@ public class WebCache implements WebCacheInterface {
 
     private WebCache() {}
 
+    public final synchronized void setCacheSizeInMB(int valueInMB) {
+        this.cacheSizeInBytes = valueInMB * 1000000;
+    }
+
     public final synchronized Boolean isCached(String key) {
         return cache.containsKey(key);
     }
