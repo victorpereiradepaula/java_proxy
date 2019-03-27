@@ -3,6 +3,7 @@ package request;
 import java.net.*;
 import java.io.*;
 import java.awt.image.BufferedImage;
+import java.nio.charset.StandardCharsets;
 import javax.imageio.ImageIO;
 
 import response.ResponseInterface;
@@ -23,32 +24,70 @@ public final class RequestThread implements Runnable {
 
     // MARK: - Refactor to handlers
     private void requestImage(String imageUrlString) {
-        try {
-            // MARK: - Google's Workaround for https images
-//            String newURLString = new StringBuilder(imageUrlString).insert(4, "s").toString();
 
-            URL imageURL = new URL(imageUrlString);
+        byte[] cachedImageBytes = WebCache.shared.retrieveFor(imageUrlString);
 
-            BufferedImage bufferedImage = ImageIO.read(imageURL);
+        if(cachedImageBytes != null) {
 
-            if(bufferedImage == null)
-                throw new IOException("IMAGE IS NULL");
+            System.out.println("IMAGE IS CACHED");
 
-            final ImageResponse imageResponse = new ImageResponse();
-            final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
-            outToClient.writeBytes(imageResponse.buildResponse());
+            InputStream imageBytesInput = new ByteArrayInputStream(cachedImageBytes);
+            try {
+                BufferedImage cachedimage = ImageIO.read(imageBytesInput);
 
-            boolean success = ImageIO.write(bufferedImage, "png", socket.getOutputStream());
-            System.out.println("IMAGE SENT: " + success );
-        } catch(IOException exception) {
-            exception.printStackTrace();
-            // MARK: - TODO answer with 500
+                if(cachedimage == null)
+                    throw new RuntimeException("Failed to convert to BufferedImage");
+
+
+                final ImageResponse imageResponse = new ImageResponse();
+                final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+                outToClient.writeBytes(imageResponse.buildResponse());
+
+                boolean success = ImageIO.write(cachedimage, "png", socket.getOutputStream());
+                System.out.println("IMAGE SENT: " + success );
+            } catch(IOException exception) {
+                // MARK: - TODO answer with 500
+            }
+        } else {
+            try {
+                URL imageURL = new URL(imageUrlString);
+
+                BufferedImage bufferedImage = ImageIO.read(imageURL);
+
+                if(bufferedImage == null)
+                    throw new IOException("Failed to download image");
+
+                final ImageResponse imageResponse = new ImageResponse();
+                final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+                outToClient.writeBytes(imageResponse.buildResponse());
+
+                int lastIndexOfDot = imageUrlString.lastIndexOf(".");
+                String extension = imageUrlString.substring(lastIndexOfDot+1, imageUrlString.length());
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ImageIO.write(bufferedImage, extension, byteArrayOutputStream);
+
+                WebCache.shared.saveOnCacheFor(imageUrlString, byteArrayOutputStream.toByteArray());
+
+                boolean success = ImageIO.write(bufferedImage, extension, socket.getOutputStream());
+                System.out.println("IMAGE SENT: " + success );
+            } catch(IOException exception) {
+                exception.printStackTrace();
+                // MARK: - TODO answer with 500
+            }
         }
     }
 
     // MARK: - Refactor to handlers
     private void plainHTMLRequest(Request request) {
-        String cachedHTML = WebCache.shared.retrieveWebPageFor(request.urlString);
+
+        byte[] cachedItemBytes = WebCache.shared.retrieveFor(request.urlString);
+
+        String cachedHTML = null;
+        if(cachedItemBytes != null) {
+            cachedHTML = new String(cachedItemBytes, StandardCharsets.UTF_8);
+        }
+
         if(cachedHTML == null) {
 
             try {
@@ -59,7 +98,7 @@ public final class RequestThread implements Runnable {
                 final int responseCode = connection.getResponseCode();
 
                 if(responseCode == 301) {
-                    // redirect
+                    // Redirect
                     String redirectURL = connection.getHeaderField("Location");
                     String cookies = connection.getHeaderField("Set-Cookie");
 
@@ -86,29 +125,26 @@ public final class RequestThread implements Runnable {
                 final ResponseInterface response = new Response(responseCode, content.toString());
 
                 if(responseCode == 200) {
-                    WebCache.shared.saveWebPageFor(request.urlString, content.toString());
+                    WebCache.shared.saveOnCacheFor(request.urlString, content.toString().getBytes());
                 }
 
                 System.out.println(response.buildResponse());
                 outToClient.writeBytes(response.buildResponse());
 
             } catch(IOException exception) {
-                System.out.println("IOException!!!");
                 exception.printStackTrace();
             }
 
         } else {
+            System.out.println("RESOURCE IS CACHED");
 
             try {
-
-                System.out.println("IS CACHED");
 
                 final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
                 final ResponseInterface response = new Response(200, cachedHTML);
                 System.out.println(response.buildResponse());
                 outToClient.writeBytes(response.buildResponse());
             } catch(IOException exception) {
-                System.out.println("IOException!!!");
                 exception.printStackTrace();
             }
         }

@@ -1,59 +1,56 @@
-import java.net.*;
-
-import cache.WebCache;
-
-import java.io.*; 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import request.*;
 
-final class MainServer {
+public class MainServer {
 
-	public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
+        if(args.length > 0) {
+            String command = args[0];
+            if(command.equals("--help")) {
+                System.out.println("run 'Java MainServer <port-number>'' to use a custom port");
+                System.out.println("If no port is specified then the server will run on 8080");
+                System.exit(0);
+            }
+        }
 
-		if(args.length > 0) {
-			String command = args[0];
-			if(command.equals("--help")) {
-				System.out.println("run 'Java MainServer <port-number>'' to use a custom port");
-				System.out.println("If no port is specified then the server will run on 8080");
-				System.exit(0);
-			}
-		}
+        int portNumber = 8080;
+        if(args.length > 0) {
+            portNumber = Integer.parseInt(args[0]);
+        }
 
-		int portNumber = 8080;
-		if(args.length > 0) {
-			portNumber = Integer.parseInt(args[0]);
-		}
+        System.out.println("Starting proxy server at: " + portNumber);
 
-		System.out.println("Starting proxy server at: " + portNumber);
+        // Might throw exception
+        ServerSocket welcomeSocket = new ServerSocket(portNumber);
+        InetAddress address = welcomeSocket.getInetAddress();
 
-		// Might throw exception
-		ServerSocket welcomeSocket = new ServerSocket(portNumber);
-		InetAddress address = welcomeSocket.getInetAddress();
+        System.out.println("Address:" + address.getHostAddress());
 
-		System.out.println("Address:" + address.getHostAddress());
+        while(true) {
+            System.out.println("Waiting for client connection");
+            // Might throw exception
+            Socket socket = welcomeSocket.accept();
 
-		while(true) {
-			System.out.println("Waiting for client connection");
-			// Might throw exception
-			Socket socket = welcomeSocket.accept();
+            InetAddress clientSocket = socket.getInetAddress();
 
-			InetAddress clientSocket = socket.getInetAddress();
+            System.out.println("Client address: " + clientSocket.getHostAddress());
 
-			System.out.println("Client address: " + clientSocket.getHostAddress());
+            BufferedReader clientIntake = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-			BufferedReader clientIntake = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				
-			String clientText = clientIntake.readLine();
+            String clientText = clientIntake.readLine();
 
-			System.out.println("Client requested: " + clientText);
+            System.out.println("Client requested: " + clientText);
 
-			Request request = new Request(clientText);
+            Request request = new Request(clientText);
 
-			Thread requestThread = new Thread(new RequestThread(request, socket));
+            Thread requestThread = new Thread(new RequestThread(request, socket));
 
-			System.out.println("Making request...");
-
-			requestThread.start();
-		}
-	}
+            requestThread.start();
+        }
+    }
 }

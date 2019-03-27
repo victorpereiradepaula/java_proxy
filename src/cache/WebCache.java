@@ -3,61 +3,56 @@ package cache;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public final class WebCache implements WebCacheInterface {
+public class WebCache implements WebCacheInterface {
 
-	private HashMap<String, CachedItem> cache = new HashMap<String, CachedItem>();
-	private LinkedList<String> cachePerDate = new LinkedList<String>();
-	private int cacheSizeInBytes = 50000000;
-	private int freeSpace = 50000000;
+    public static WebCache shared = new WebCache();
 
-	public final synchronized void setCacheSizeInMB(int valueInMB) {
-		this.cacheSizeInBytes = valueInMB * 1000000;
-	}
+    private HashMap<String, CachedItem> cache = new HashMap<>();
+    private LinkedList<String> cachePerDate = new LinkedList<>();
+    private int cacheSizeInBytes = 50000000;
+    private int freeSpace = 50000000;
 
-	public final synchronized Boolean isCached(String url) {
-		return cache.containsKey(url);
-	}
+    private WebCache() {}
 
-	public final synchronized String retrieveWebPageFor(String url) {
-		if(this.isCached(url)) {
-			CachedItem cachedItem = cache.get(url);
-			this.updateLastAccessDate(url, cachedItem);
-			return cachedItem.getItem();
-		} else {
-			return null;
-		}
-	}
+    public final synchronized Boolean isCached(String key) {
+        return cache.containsKey(key);
+    }
 
-	public final synchronized void saveWebPageFor(String url, String webPage) {
-		int pageSize = webPage.getBytes().length;
-		if(pageSize <= this.cacheSizeInBytes) {
-			addOnCache(url, webPage, pageSize);
-		} else {
-			System.out.println("Não foi possível adicionar página à cache.");
-		}
-	}
+    public final synchronized byte[] retrieveFor(String key) {
+        CachedItem cached = cache.get(key);
 
-	private final synchronized void addOnCache(String url, String webPage, int pageSize) {
-		if(pageSize >= this.freeSpace) {
-			removeCachedItemUntil(pageSize);
-		}
-		cachePerDate.addFirst(url);
-		cache.put(url, new cache.CachedItem(webPage));
-		this.freeSpace -= pageSize;
-		System.out.println("Página adicionada à cache com sucesso.");
-		System.out.printf("Espaço livre na cache: %d\n", this.freeSpace);
-	}
+        if(cached == null)
+            return null;
 
-	private final synchronized void removeCachedItemUntil(int pageSize) {
-		while(this.cacheSizeInBytes >= pageSize && this.freeSpace >= pageSize) {
-			CachedItem removedItem = cache.remove(cachePerDate.removeLast());
-			this.freeSpace += removedItem.getSize();
-		}
-	}
+        updateLastAccessDate(key, cached);
 
-	private final synchronized void updateLastAccessDate(String url, CachedItem cachedItem) {
-		cachePerDate.remove(url);
-		cachePerDate.addFirst(url);
-		cachedItem.updateLastAccessDate();
-	}
+        return cached.item;
+    }
+
+    public final synchronized void saveOnCacheFor(String key, byte[] cachable) {
+
+        int size = cachable.length;
+        if(size >= freeSpace) {
+            removeCachedItemUntil(size);
+        }
+
+        cachePerDate.addFirst(key);
+
+        cache.put(key, new CachedItem(cachable));
+
+        this.freeSpace -= size;
+    }
+
+    private final synchronized void removeCachedItemUntil(int size) {
+        while(this.cacheSizeInBytes >= size && freeSpace >= size) {
+            CachedItem removed = cache.remove(cachePerDate.removeLast());
+            this.freeSpace += removed.item.length;
+        }
+    }
+
+    private final synchronized void updateLastAccessDate(String key, CachedItem cancehdItem) {
+        cachePerDate.remove(key);
+        cachePerDate.addFirst(key);
+        cancehdItem.updateLastAccessDate();
+    }
 }
