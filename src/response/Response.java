@@ -2,13 +2,13 @@ package response;
 
 public final class Response implements ResponseInterface {
 
-	private final int statusCode;
-	private final String html;
+    private final int statusCode;
+    private final String html;
 
-	public Response(int statusCode, String html) {
-		this.statusCode = statusCode;
-		this.html = html;
-	}
+    public Response(int statusCode, String html) {
+        this.statusCode = statusCode;
+        this.html = html;
+    }
 
 	public String buildResponse() {
 		String response = "";
