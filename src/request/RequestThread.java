@@ -45,8 +45,19 @@ public final class RequestThread implements Runnable {
 
                 boolean success = ImageIO.write(cachedimage, "png", socket.getOutputStream());
                 System.out.println("IMAGE SENT: " + success );
-            } catch(IOException exception) {
-                // MARK: - TODO answer with 500
+            } catch(IOException ioException) {
+
+                String errorResponse = "HTTP/1.1 404 File not found\r\n" +
+                        "Server: Proxy Server/1.0\r\n" +
+                        "Connection: Close\r\n\r\n";
+
+                try {
+                    final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+                    outToClient.writeBytes(errorResponse);
+                } catch(Exception exception) {
+                    // MARK: - Cant do much about it.
+                    exception.printStackTrace();
+                }
             }
         } else {
             try {
@@ -71,9 +82,18 @@ public final class RequestThread implements Runnable {
 
                 boolean success = ImageIO.write(bufferedImage, extension, socket.getOutputStream());
                 System.out.println("IMAGE SENT: " + success );
-            } catch(IOException exception) {
-                exception.printStackTrace();
-                // MARK: - TODO answer with 500
+            } catch(IOException ioException) {
+                String errorResponse = "HTTP/1.1 404 File not found\r\n" +
+                        "Server: Proxy Server/1.0\r\n" +
+                        "Connection: Close\r\n\r\n";
+
+                try {
+                    final DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
+                    outToClient.writeBytes(errorResponse);
+                } catch(Exception exception) {
+                    // MARK: - Cant do much about it.
+                    exception.printStackTrace();
+                }
             }
         }
     }
