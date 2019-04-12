@@ -31,4 +31,6 @@ Ensinaremos de forma breve a configuração do Firefox para utilizar o proxy:
 1. Requisição de vídeos: Não foram realizados os tratamentos necessários para requisições de vídeos, nem o armazenamento destes na cache.
 
 ## Conclusão
-O Proxy funciona, no entanto há necessidade de fazer tratamentos para requisições de arquivos *.js*, *.css*, *arquivos de vídeo* entre outros, para que possamos utiliza-lo na maioria dos sites http sem falhas.
+O Proxy funcionou corretamente para sites simples como *http://pudim.com.br/* ou *http://example.com/*, no entanto em páginas com estruturas de arquivos mais complexas como *http://dados.gov.br/dataset/dominios-gov-br* ou *http://abelhasbrasil.myspecies.info/* não renderizam corretamente. Na versão atual foram tratados apenas requisições de texto e imagens (**JPG** e **PNG**), desta forma conteúdos em formatos diferentes não são baixados, alterando como a página é exibida.
+Outro ponto de atenção é a necessidade de tratamento dos arquivos de texto, para que a renderização de caracteres especiais seja feita corretamente, atualmente letras acentuadas e outros caracteres especiais são substituídos pelo caracter **�**.
+Criamos uma página de erro para ser exibida quando algum erro ocorre durante a requisição da página, no entanto algumas páginas tem problemas em requisições de itens secundários, mas que sem eles não é possível vizualizar ou navegar pela página, no entanto nesses casos não há renderização da página de erro.
